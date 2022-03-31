@@ -1,0 +1,15 @@
+name: "Helm linter tools"
+description: "Tools working with helm charts"
+inputs:
+  chart_location:
+    description: 'Manually specify chart directory. If not all charts will be scanned'
+    required: false
+  linter_config:
+    description: 'Path to config file'
+    required: false
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.chart_location }}
+    - ${{ inputs.linter_config }}
