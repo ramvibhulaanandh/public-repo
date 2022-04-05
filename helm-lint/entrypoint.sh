@@ -63,18 +63,28 @@ function summaryReport {
   echo "3. Summary"
   if [[ "$1" -eq 0 ]]; then
     echo "Examination is completed; no errors found!"
+    echo "----------------------------------------"
     return 0
   else
     echo "Examination is completed; errors found, check the log for details!"
+    echo "----------------------------------------"
     return 1
   fi
 }
 
 
-
+EXIT_CODE=0
 for CHART_LOCATION in $(find "${INPUT_CHART_LOCATION}" -iname "Chart.yaml" -print 2>/dev/null | xargs -n1 dirname); do
 	HELM_TEMPLATE_TMP="$(mktemp -dt helm-template-XXXXXX)"
 	helmTemplate "$CHART_LOCATION" "$HELM_TEMPLATE_TMP"
     helmLint "$HELM_TEMPLATE_TMP" $?
-    summaryReport $?
-done || exit 1
+    summaryReport $? || EXIT_CODE=$?
+
+done
+
+if [[ "$EXIT_CODE" -eq 0 ]]; then
+	return 0
+else
+	echo "Helm Linting failed with errors"
+	exit 1
+fi
